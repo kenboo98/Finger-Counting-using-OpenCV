@@ -8,6 +8,9 @@ env/
 build/
 dist/
 eggs/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # DS_Store
 .DS_Store
