@@ -1,14 +1,14 @@
 import rumps
 import os
 import sys
-import runControl
+import videoControl
 
 class GestureVid(rumps.App):
 
     # If run is pressed
     @rumps.clicked("Run...")
     def onClick(self, _):
-        runControl.runControl()
+        videoControl.runControl()
 
 if __name__ == "__main__":
 

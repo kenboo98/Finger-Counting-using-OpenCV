@@ -6,7 +6,7 @@ import time
 # github with few edits to make it fit to out purposes
 FREQ_THRESHOLD = 50
 
-def getCount():
+def getCount(size):
 
     # Camera capture, 0 is inbuilt cam
     cap = cv2.VideoCapture(0)
@@ -19,7 +19,7 @@ def getCount():
 
     countArray = []
 
-    for i in range(30):
+    for i in range(size):
         countArray.append(0)
 
     while(True):
@@ -176,7 +176,7 @@ def getCount():
         if k == 27:
             break
 
-    cap.release()
-    cv2.destroyAllWindows()
+    # cap.release()
+    # cv2.destroyAllWindows()
 
     return np.bincount(countArray).argmax()
