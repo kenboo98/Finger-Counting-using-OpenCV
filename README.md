@@ -1,2 +1,2 @@
 # GestureVid
-Controlling videos using fingers. Built with @kenboo98 at HackEDBeta2017
+Controlling videos using fingers. Built with @DanishDua98 at HackEDBeta2017
