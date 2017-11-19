@@ -72,7 +72,10 @@ def getCount():
                 ci = i
 
     	# Largest area contour
-        cnts = contours[ci]
+        try:
+            cnts = contours[ci]
+        except IndexError:
+            cnts = 0
 
         # Find convex hull
         hull = cv2.convexHull(cnts)
@@ -168,22 +171,6 @@ def getCount():
             if ((counts_elements[i] / len(countArray)) > FREQ_THRESHOLD/100):
                 break
 
-
-        # # This code is to display image
-        #
-        #
-        # # Print number of pointed fingers
-        # cv2.putText(frame,str(result),(100,100),font,2,(255,255,255),2)
-        #
-        # # Print bounding rectangle
-        # x,y,w,h = cv2.boundingRect(cnts)
-        # img = cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
-        #
-        # cv2.drawContours(frame, [hull], -1, (255,255,255), 2)
-        #
-        # # final image
-        # cv2.imshow('Dilation', frame)
-
         # close on ESC
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
@@ -193,7 +180,3 @@ def getCount():
     cv2.destroyAllWindows()
 
     return np.bincount(countArray).argmax()
-
-
-while(True):
-    print(getCount())
