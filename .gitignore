@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+.Python
+env/
+build/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# DS_Store
+.DS_Store
+
+# source code package
+.zip
+.tar.gz
