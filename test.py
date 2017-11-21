@@ -98,12 +98,12 @@ while(True):
     _, contours, hierarchy = cv2.findContours(detection_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     # find max area index, the area should be less than MAX_AREA though
-    max_area = 10000
+    max_area = config_params.MIN_AREA
     ci = 0
     for i in range(len(contours)):
         cnt = contours[i]
         area = cv2.contourArea(cnt)
-        if(area > max_area and area < 170000):
+        if(area > max_area and area < config_params.MAX_AREA):
             max_area = area
             print(max_area)
             ci = i
@@ -118,7 +118,7 @@ while(True):
     detection_draw = np.zeros(detection_region.shape,np.uint8)
     count_defects = 0
 
-    if(max_area > 10000 and max_area < 170000):
+    if(max_area > config_params.MIN_AREA and max_area < config_params.MAX_AREA):
         # find convex hull for largest area countour
         hull = cv2.convexHull(cnts)
 
