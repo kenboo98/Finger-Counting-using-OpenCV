@@ -23,11 +23,11 @@ def runControl():
             while (MODE == MODE_MAIN):
                 x, y = pyautogui.position()
 
-                result = detection.getCount(30)
+                result = detection.getCount(1)
 
                 if (result == 5):
                     pyautogui.click(button='left')
-                    MODE == MODE_VID
+                    MODE = MODE_VID
                 elif (result == 4):
                     if (x + 20 < xm):
                         pyautogui.moveTo(x + 50, y, 1)
@@ -44,8 +44,8 @@ def runControl():
         # If we're on video screen mode
         if (MODE == MODE_VID):
 
-            while (True):
-                result = detection.getCount(30)
+            while (MODE == MODE_VID):
+                result = detection.getCount(5)
 
                 if (result == 5):
                     pyautogui.press('k')

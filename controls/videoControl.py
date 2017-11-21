@@ -9,7 +9,7 @@ def runControl():
         result = detection.getCount(5)
 
         # printing just to debug and configure
-        print(result)
+        # print(result)
 
         if (result == 5):
             pyautogui.press('k')
