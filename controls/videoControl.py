@@ -1,4 +1,4 @@
-import detection as dtec
+import detection.detection as dtec
 import webbrowser
 import pyautogui
 
@@ -9,6 +9,7 @@ def runControl():
     while (True):
         result = dtec.getCount(30)
         print(result)
+
         if (result == 5):
             pyautogui.press('k')
         elif (result == 4):

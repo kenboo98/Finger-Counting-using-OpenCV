@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
-import time
 
-# The detection file is mostly based on @sashagaz's finger detection code on
-# github with few edits to make it fit to out purposes
+# The detection file is based on @sashagaz's finger detection code on github
 FREQ_THRESHOLD = 50
 
 def getCount(size):
@@ -20,7 +18,7 @@ def getCount(size):
     countArray = []
 
     for i in range(size):
-        countArray.append(0)
+        countArray.append(result)
 
     while(True):
 
@@ -29,22 +27,27 @@ def getCount(size):
 
         # Blur the image
         blur = cv2.blur(frame,(3,3))
+        cv2.imshow('blur', blur)
 
      	# Convert to HSV color space
         hsv = cv2.cvtColor(blur,cv2.COLOR_BGR2HSV)
+        cv2.imshow('hsv', hsv)
 
         # Create a binary image with where white will be skin colors and rest is black
-        mask2 = cv2.inRange(hsv,np.array([2,50,50]),np.array([15,255,255]))
+        mask2 = cv2.inRange(hsv,np.array([2,48,80]),np.array([15,255,255]))
+        cv2.imshow('mask2', mask2)
 
         # Kernel matrices for morphological transformation
         kernel_square = np.ones((11,11),np.uint8)
-        kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
+        kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(6,6))
 
         # Perform morphological transformations to filter out the background noise
         # Dilation increase skin color area
         # Erosion increase skin color area
         dilation = cv2.dilate(mask2,kernel_ellipse,iterations = 1)
+        cv2.imshow('dilation', dilation)
         erosion = cv2.erode(dilation,kernel_square,iterations = 1)
+        cv2.imshow('erosion', erosion)
         dilation2 = cv2.dilate(erosion,kernel_ellipse,iterations = 1)
         filtered = cv2.medianBlur(dilation2,5)
         kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))
@@ -52,14 +55,13 @@ def getCount(size):
         kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
         dilation3 = cv2.dilate(filtered,kernel_ellipse,iterations = 1)
         median = cv2.medianBlur(dilation2,5)
+        cv2.imshow('med', median)
         ret,thresh = cv2.threshold(median,127,255,0)
+        cv2.imshow('thresh', thresh)
+
 
         # Find contours of the filtered frame
         _, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-
-        # Draw Contours
-        # cv2.drawContours(frame, cnt, -1, (122,122,0), 3)
-        # cv2.imshow('Dilation',median)
 
     	# Find Max contour area (Assume that hand is in the frame)
         max_area = 100
@@ -180,3 +182,8 @@ def getCount(size):
     # cv2.destroyAllWindows()
 
     return np.bincount(countArray).argmax()
+
+
+while(True):
+    res = getCount(30)
+    print(res)

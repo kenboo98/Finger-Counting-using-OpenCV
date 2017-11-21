@@ -1,4 +1,4 @@
-import detection as dtec
+import detection.detection as dtec
 import webbrowser
 import pyautogui
 
@@ -24,8 +24,7 @@ def runControl():
                 x, y = pyautogui.position()
 
                 result = dtec.getCount(30)
-                print('main')
-                print(result)
+
                 if (result == 5):
                     pyautogui.click(button='left')
                     MODE == MODE_VID
@@ -47,8 +46,7 @@ def runControl():
 
             while (True):
                 result = dtec.getCount(30)
-                print('vid')
-                print('result')
+
                 if (result == 5):
                     pyautogui.press('k')
                 elif (result == 4):

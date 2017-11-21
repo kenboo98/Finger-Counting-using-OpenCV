@@ -2,7 +2,7 @@ from setuptools import setup
 
 APP = ['GestureVid.py']
 APP_NAME = "GestureVid"
-DATA_FILES = []
+DATA_FILES = [('', ['configuration'])]
 OPTIONS = {
     'argv_emulation': True,
     'iconfile': 'icons/app.icns',

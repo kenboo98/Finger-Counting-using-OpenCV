@@ -8,6 +8,7 @@ env/
 build/
 dist/
 eggs/
+./eggs
 *.egg-info/
 .installed.cfg
 *.egg
