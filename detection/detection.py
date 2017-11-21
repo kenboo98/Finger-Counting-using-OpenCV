@@ -1,169 +1,112 @@
 import cv2
 import numpy as np
+import math
+import detection.config as config
 
-# The detection file is based on @sashagaz's finger detection code on github
 FREQ_THRESHOLD = 50
 
+# returns finger count
 def getCount(size):
+    # size is used to define the array size which stores the last few counts
+    # this is to improve accuracy
 
-    # Camera capture, 0 is inbuilt cam
-    cap = cv2.VideoCapture(0)
-
-    # Set frame
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1000)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+    # initialize camera
+    capture = cv2.VideoCapture(0)
 
     result = 0
 
+    # initialize array to keep detected values
     countArray = []
-
     for i in range(size):
         countArray.append(result)
 
+    # setup the parameters configured in test.py
+    SUB_START_X = int(config.getConfig('config', 'SUB_START_X'))
+    SUB_START_Y = int(config.getConfig('config', 'SUB_START_Y'))
+    SUB_END_X = int(config.getConfig('config', 'SUB_END_X'))
+    SUB_END_Y = int(config.getConfig('config', 'SUB_END_Y'))
+    MAX_AREA = int(config.getConfig('config', 'MAX_AREA'))
+    MIN_AREA = int(config.getConfig('config', 'MIN_AREA'))
+
     while(True):
 
-        # Capture frames from the camera
-        ret, frame = cap.read()
+        # read frame
+        ret, frame = capture.read()
 
-        # Blur the image
-        blur = cv2.blur(frame,(3,3))
-        cv2.imshow('blur', blur)
+        # get cropped area (detection region)
+        cv2.rectangle(frame, (SUB_START_X,SUB_START_Y), (SUB_END_X,SUB_END_Y), (0,255,0), 0)
+        detection_region = frame[SUB_START_X:SUB_END_X, SUB_START_Y:SUB_END_Y]
 
-     	# Convert to HSV color space
-        hsv = cv2.cvtColor(blur,cv2.COLOR_BGR2HSV)
-        cv2.imshow('hsv', hsv)
+        # get detection region's grayscale and apply GaussianBlur, 35 is the standard
+        # deviation of the gaussian kernel
+        detection_gray = cv2.cvtColor(detection_region, cv2.COLOR_BGR2GRAY)
+        detection_blur = cv2.GaussianBlur(detection_gray, (35, 35), 0)
 
-        # Create a binary image with where white will be skin colors and rest is black
-        mask2 = cv2.inRange(hsv,np.array([2,48,80]),np.array([15,255,255]))
-        cv2.imshow('mask2', mask2)
+        # using Otsu's thresholding at center of the 8-bit scale
+        _, detection_thresh = cv2.threshold(detection_blur, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-        # Kernel matrices for morphological transformation
-        kernel_square = np.ones((11,11),np.uint8)
-        kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(6,6))
+        # find all Contours
+        _, contours, hierarchy = cv2.findContours(detection_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-        # Perform morphological transformations to filter out the background noise
-        # Dilation increase skin color area
-        # Erosion increase skin color area
-        dilation = cv2.dilate(mask2,kernel_ellipse,iterations = 1)
-        cv2.imshow('dilation', dilation)
-        erosion = cv2.erode(dilation,kernel_square,iterations = 1)
-        cv2.imshow('erosion', erosion)
-        dilation2 = cv2.dilate(erosion,kernel_ellipse,iterations = 1)
-        filtered = cv2.medianBlur(dilation2,5)
-        kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(8,8))
-        dilation2 = cv2.dilate(filtered,kernel_ellipse,iterations = 1)
-        kernel_ellipse= cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
-        dilation3 = cv2.dilate(filtered,kernel_ellipse,iterations = 1)
-        median = cv2.medianBlur(dilation2,5)
-        cv2.imshow('med', median)
-        ret,thresh = cv2.threshold(median,127,255,0)
-        cv2.imshow('thresh', thresh)
-
-
-        # Find contours of the filtered frame
-        _, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-
-    	# Find Max contour area (Assume that hand is in the frame)
-        max_area = 100
+        # find max area index, the area should be less than MAX_AREA though
+        max_area = MIN_AREA
         ci = 0
         for i in range(len(contours)):
             cnt = contours[i]
             area = cv2.contourArea(cnt)
-            if(area > max_area):
+            if (area > max_area and area < MAX_AREA):
                 max_area = area
                 ci = i
 
-    	# Largest area contour
+        # Largest area contour
         try:
             cnts = contours[ci]
         except IndexError:
             cnts = 0
 
-        # Find convex hull
-        hull = cv2.convexHull(cnts)
+        count_defects = 0
 
-        # Find convex defects
-        hull2 = cv2.convexHull(cnts,returnPoints = False)
-        defects = cv2.convexityDefects(cnts,hull2)
+        if (max_area > MIN_AREA and max_area < MAX_AREA):
+            # find convex hull for largest area countour
+            hull = cv2.convexHull(cnts)
 
-        # Get defect points and draw them in the original image
-        FarDefect = []
-        for i in range(defects.shape[0]):
-            s,e,f,d = defects[i,0]
-            start = tuple(cnts[s][0])
-            end = tuple(cnts[e][0])
-            far = tuple(cnts[f][0])
-            FarDefect.append(far)
-            cv2.line(frame,start,end,[0,255,0],1)
-            cv2.circle(frame,far,10,[100,255,255],3)
+            # find convex hull for largest area countour with no returnPoints
+            hull = cv2.convexHull(cnts, returnPoints=False)
 
-    	# Find moments of the largest contour
-        moments = cv2.moments(cnts)
+            # find convexity defects
+            defects = cv2.convexityDefects(cnts, hull)
+            count_defects = 0
 
-        # Central mass of first order moments
-        if moments['m00']!=0:
-            cx = int(moments['m10']/moments['m00']) # cx = M10/M00
-            cy = int(moments['m01']/moments['m00']) # cy = M01/M00
-        centerMass=(cx,cy)
+            # use cosine rule to check for angles between fingers
+            if type(defects) != type(None):
+                count_defects += 1
+                for i in range(defects.shape[0]):
+                    start_def, end_def, mid_def, d = defects[i,0]
 
-        # Draw center mass
-        cv2.circle(frame,centerMass,7,[100,0,255],2)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(frame,'Center',tuple(centerMass),font,2,(255,255,255),2)
+                    start = tuple(cnts[start_def][0])
+                    end = tuple(cnts[end_def][0])
+                    mid = tuple(cnts[mid_def][0])
 
-        # Distance from each finger defect(finger webbing) to the center mass
-        distanceBetweenDefectsToCenter = []
-        for i in range(0,len(FarDefect)):
-            x =  np.array(FarDefect[i])
-            centerMass = np.array(centerMass)
-            distance = np.sqrt(np.power(x[0]-centerMass[0],2)+np.power(x[1]-centerMass[1],2))
-            distanceBetweenDefectsToCenter.append(distance)
+                    # start, mid and end make a triangle (btw fingers), only register
+                    # if angle between sides from finger centers to finger tips is less
+                    # than 90
+                    # side_b and side_c are fingera
+                    side_a = math.sqrt((end[0] - start[0])**2 + (end[1] - start[1])**2)
+                    side_b = math.sqrt((mid[0] - start[0])**2 + (mid[1] - start[1])**2)
+                    side_c = math.sqrt((end[0] - mid[0])**2 + (end[1] - mid[1])**2)
 
-        # Get an average of three shortest distances from finger webbing to center mass
-        sortedDefectsDistances = sorted(distanceBetweenDefectsToCenter)
-        AverageDefectDistance = np.mean(sortedDefectsDistances[0:2])
+                    # get angle, convert to degrees
+                    fin_angle = math.acos((side_b**2 + side_c**2 - side_a**2)/(2*side_b*side_c)) * 57
 
-        # Get fingertip points from contour hull
-        # If points are in proximity of 80 pixels, consider as a single point in the group
-        finger = []
-        for i in range(0,len(hull)-1):
-            if (np.absolute(hull[i][0][0] - hull[i+1][0][0]) > 80) or ( np.absolute(hull[i][0][1] - hull[i+1][0][1]) > 80):
-                if hull[i][0][1] < 500 :
-                    finger.append(hull[i][0])
+                    # ignore angles > 90
+                    if fin_angle <= 90:
+                        count_defects += 1
 
-        # The fingertip points are 5 hull points with largest y coordinates
-        finger =  sorted(finger,key=lambda x: x[1])
-        fingers = finger[0:5]
-
-        # Calculate distance of each finger tip to the center mass
-        fingerDistance = []
-        for i in range(0,len(fingers)):
-            distance = np.sqrt(np.power(fingers[i][0]-centerMass[0],2)+np.power(fingers[i][1]-centerMass[0],2))
-            fingerDistance.append(distance)
-
-        # Finger is pointed/raised if the distance of between fingertip to the center mass is larger
-        # than the distance of average finger webbing to center mass by 130 pixels
-        result = 0
-
-        for i in range(0,len(fingers)):
-            if fingerDistance[i] > AverageDefectDistance + 130:
-                result = result + 1
-
-        countArray.append(result)
+        # add count_defects to countArray
+        countArray.append(count_defects)
         countArray.pop(0)
 
-        # Print number of pointed fingers
-        cv2.putText(frame,str(result),(100,100),font,2,(255,255,255),2)
-
-        # Print bounding rectangle
-        x,y,w,h = cv2.boundingRect(cnts)
-        img = cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
-
-        cv2.drawContours(frame, [hull], -1, (255,255,255), 2)
-
-        # final image
-        cv2.imshow('Dilation', frame)
-
+        # check for most frequent value
         if (np.bincount(countArray).argmax() != 0):
             unique_elements, counts_elements = np.unique(countArray, return_counts=True)
             i = 0
@@ -173,17 +116,15 @@ def getCount(size):
             if ((counts_elements[i] / len(countArray)) > FREQ_THRESHOLD/100):
                 break
 
-        # close on ESC
-        k = cv2.waitKey(5) & 0xFF
+
+        k = cv2.waitKey(5)
         if k == 27:
             break
 
-    # cap.release()
-    # cv2.destroyAllWindows()
-
+    # return final value
     return np.bincount(countArray).argmax()
 
-
-while(True):
-    res = getCount(30)
-    print(res)
+# just to test
+# while(True):
+#     res = getCount(5)
+#     print(res)
