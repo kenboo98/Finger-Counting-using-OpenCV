@@ -1,5 +1,4 @@
 import detection.detection as detection
-import webbrowser
 import pyautogui
 
 def runControl():
@@ -8,7 +7,7 @@ def runControl():
     """
     while (True):
         result = detection.getCount(5)
-        
+
         # printing just to debug and configure
         print(result)
 
@@ -24,4 +23,4 @@ def runControl():
             pyautogui.press('j')
 
         # just a small delay before next loop
-        delay(2)
+        # delay(2)

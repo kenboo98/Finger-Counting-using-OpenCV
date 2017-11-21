@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
 import math
-import detection.config as config
+try:
+    from . import config
+except ImportError:
+    import config
 
 FREQ_THRESHOLD = 50
 
@@ -117,14 +120,17 @@ def getCount(size):
                 break
 
 
-        k = cv2.waitKey(5)
+        k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break
 
     # return final value
+    capture.release()
+    cv2.destroyAllWindows()
     return np.bincount(countArray).argmax()
 
-# just to test
+# just to test, if you uncomment this, app won't run the rumps module since
+# this is supposed to be treated as a package
 # while(True):
 #     res = getCount(5)
 #     print(res)

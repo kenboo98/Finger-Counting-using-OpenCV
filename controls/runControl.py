@@ -30,16 +30,16 @@ def runControl():
                     MODE == MODE_VID
                 elif (result == 4):
                     if (x + 20 < xm):
-                        pyautogui.moveTo(x + 50, y)
+                        pyautogui.moveTo(x + 50, y, 1)
                 elif (result == 3):
                     if (x - 20 > 0):
-                        pyautogui.moveTo(x - 50, y)
+                        pyautogui.moveTo(x - 50, y, 1)
                 elif (result == 2):
                     if (y + 15 < ym):
-                        pyautogui.moveTo(x, y + 35)
+                        pyautogui.moveTo(x, y + 35, 1)
                 elif (result == 1):
                     if (y - 15 > 0):
-                        pyautogui.moveTo(x, y - 35)
+                        pyautogui.moveTo(x, y - 35, 1)
 
         # If we're on video screen mode
         if (MODE == MODE_VID):
