@@ -2,7 +2,7 @@ from setuptools import setup
 
 APP = ['GestureVid.py']
 APP_NAME = "GestureVid"
-DATA_FILES = []
+DATA_FILES = [('', ['configuration'])]
 OPTIONS = {
     'argv_emulation': True,
     'iconfile': 'icons/app.icns',
@@ -17,7 +17,7 @@ OPTIONS = {
         'NSHumanReadableCopyright': u"Copyright \u00a9, 2017, Danish Dua and \
             Kenta Tellambura"
     },
-    'packages': ['controls', 'detection', 'numpy', 'pyautogui', 'cv2', 'rumps'],
+    'packages': [ 'detection', 'controls', 'numpy', 'pyautogui', 'cv2', 'rumps'],
 }
 
 setup(
