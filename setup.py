@@ -17,7 +17,7 @@ OPTIONS = {
         'NSHumanReadableCopyright': u"Copyright \u00a9, 2017, Danish Dua and \
             Kenta Tellambura"
     },
-    'packages': [ 'detection', 'numpy', 'pyautogui', 'cv2', 'rumps'],
+    'packages': [ 'detection', 'controls', 'numpy', 'pyautogui', 'cv2', 'rumps'],
 }
 
 setup(

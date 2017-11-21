@@ -1,7 +1,7 @@
 import rumps
 import os
 import sys
-import videoControl
+import controls.videoControl
 
 class GestureVid(rumps.App):
 
