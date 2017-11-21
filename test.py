@@ -105,9 +105,9 @@ while(True):
         area = cv2.contourArea(cnt)
         if(area > max_area and area < config_params.MAX_AREA):
             max_area = area
-            print(max_area)
+            # print max_area for debugging only
+            # print(max_area)
             ci = i
-            print(ci)
 
     # Largest area contour
     try:

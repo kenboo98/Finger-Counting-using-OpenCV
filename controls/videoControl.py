@@ -1,5 +1,4 @@
-import detection.detection as dtec
-import webbrowser
+import detection.detection as detection
 import pyautogui
 
 def runControl():
@@ -7,8 +6,10 @@ def runControl():
         read for finger count and process accordingly
     """
     while (True):
-        result = dtec.getCount(30)
-        print(result)
+        result = detection.getCount(5)
+
+        # printing just to debug and configure
+        # print(result)
 
         if (result == 5):
             pyautogui.press('k')
@@ -20,3 +21,6 @@ def runControl():
             pyautogui.press('l')
         elif (result == 1):
             pyautogui.press('j')
+
+        # just a small delay before next loop
+        # delay(2)
