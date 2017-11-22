@@ -55,11 +55,11 @@ class params():
 
     def setMaxArea(self, val):
         self.MAX_AREA = int(val)
-        config.writeConfig('config', 'SUB_MAX_AREA', val)
+        config.writeConfig('config', 'MAX_AREA', val)
 
     def setMinArea(self, val):
         self.MIN_AREA = int(val)
-        config.writeConfig('config', 'SUB_MIN_AREA', val)
+        config.writeConfig('config', 'MIN_AREA', val)
 
 config_params = params()
 
