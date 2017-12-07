@@ -2,11 +2,6 @@ import detection.detection as detection
 import webbrowser
 import pyautogui
 
-MODE_MAIN = 0
-MODE_VID = 1
-
-MODE = MODE_MAIN
-
 def runControl():
     """
         read for finger count and process accordingly
@@ -14,6 +9,11 @@ def runControl():
     webbrowser.open('https://www.youtube.com')
 
     xm, ym = pyautogui.size()
+
+    MODE_MAIN = 0
+    MODE_VID = 1
+
+    MODE = MODE_MAIN
 
     while (True):
 
