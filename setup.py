@@ -171,6 +171,6 @@ while(True):
     test = np.hstack((detection_draw, detection_region))
     cv2.imshow('test.py', test)
 
-    k = cv2.waitKey(5)
+    k = cv2.waitKey(5) & 0xff
     if k == 27:
         break
